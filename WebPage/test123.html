@@ -1,0 +1,26 @@
+HTTP/1.1 200 OK
+Content-Type: text/html
+Connection: close
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Document</title>
+	</head>
+	<body>
+		<script>
+			var date = new Date();
+			var hour = date.getHours();
+
+			if(hour < 12)
+			{
+				alert("오전");
+			}
+			if(hour >= 12)
+			{
+				alert("오후");
+			}
+		</script>
+
+	</body>
+</html>
