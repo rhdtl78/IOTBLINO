@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="author" content="Igor Fonseca Albuquerque">
+<title>F*CK YOU - Interface</title>
+
+<script src="jquery.js"></script>
+
+<script>
+
+$.ajaxSetup({timeout:1000});
+
+
+function mouseUpSr1(angle)
+{
+	TextVar = myform2.inputbox.value;
+	ArduinoVar = "http://" + TextVar + ":80";
+	$.get( ArduinoVar, { "sr1": angle })	;
+	{Connection: close};
+}
+function mouseUpSr2(angle)
+{
+	TextVar = myform2.inputbox.value;
+	ArduinoVar = "http://" + TextVar + ":80";
+	$.get( ArduinoVar, { "sr2": angle })	;
+	{Connection: close};
+}
+
+</script>
+
+</head>
+
+
+<body>
+
+<h1> <b> F*CK WIFI_TEST </b> </h1>
+
+<div style="margin: 0; width:500px; height:80px;">
+	<FORM NAME="myform2" ACTION="" METHOD="GET">
+		주소 때려박어!:
+		<INPUT TYPE="text" NAME="inputbox" VALUE="192.168.0.9">
+	</FORM>
+</div>
+
+
+<h3> F*CK SERVO1 </h3>
+<input type="range" min="20" max="170" onmouseup="mouseUpSr1(this.value)" />
+<h3> F*CK SERVO2 </h3>
+<input type="range" min="20" max="170" onmouseup="mouseUpSr2(this.value)" />
+
+
+</body>
+</html>
