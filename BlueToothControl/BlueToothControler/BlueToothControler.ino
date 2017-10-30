@@ -37,18 +37,22 @@ void setup() {
 void loop() {
   CDS();
   delay(1000);
+  Serial.println(stat_move);
+  Serial.println(stat_time);
   if(stat_stop==0){
   	stat_time += stat_move;
   	if(stat_time < 5){
-		stat_stop = -1;
-	}
-	else if(stat_time > 295){
-		stat_stop = 1;
-	}
-	else{
-		MotorWrite();
-		changeDC();
-	}
+		  stat_stop = -1;
+      isDown = false;
+	  }
+	  else if(stat_time > 295){
+		  stat_stop = 1;
+      isDown = true;
+	  }
+	  else{
+		  MotorWrite();
+		  changeDC();
+	  }
   }
   else{
   	if(stat_stop != stat_move){
@@ -128,7 +132,6 @@ void CDS(){
       Serial.println("Down,Close");
       if(isDown == false){
       	stat_move = 1;
-        isDown = true;
       }
       if(isClosed == false){
         m_servo.attach(pin_servo);
@@ -147,7 +150,6 @@ void CDS(){
       }
       if(isDown == false){
       	stat_move = 1;
-        isDown = true;
       }
     }else if(700 <= cds_val){
       //열고 올려야함
@@ -159,8 +161,9 @@ void CDS(){
         isClosed = false;
       }
       if(isDown == true){
+        Serial.println("isDown is true");
       	stat_move = -1;
-        isDown = false;
+        
       }
     }
   }
