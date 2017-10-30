@@ -30,16 +30,21 @@ void setup() {
   pinMode(pin_icEnable, OUTPUT);
   pinMode(pin_dcMotor1, OUTPUT);
   pinMode(pin_dcMotor2, OUTPUT);
+  m_servo.attach(pin_servo);
+  m_servo.write(90);
+  delay(1000);
+  m_servo.detach();
   delay(500);
 }
 
 // the loop function runs over and over again until power down or reset
 void loop() {
-  CDS();
+  //CDS();
+   MotorWrite();
   delay(1000);
-  Serial.println(stat_move);
-  Serial.println(stat_time);
-  if(stat_stop==0){
+//  Serial.println(stat_move);
+//  Serial.println(stat_time);
+/*  if(stat_stop==0){
   	stat_time += stat_move;
   	if(stat_time < 5){
 		  stat_stop = -1;
@@ -50,7 +55,7 @@ void loop() {
       isDown = true;
 	  }
 	  else{
-		  MotorWrite();
+		 
 		  changeDC();
 	  }
   }
@@ -60,6 +65,7 @@ void loop() {
 		stat_time += stat_move;
 	}
   }
+  */
 }
 
 /*
@@ -71,34 +77,45 @@ angle : 0 ~ 90
 void MotorWrite() {
 
   if (mySerial.available()) {
-    int tmp = mySerial.parseInt();
-    mySerial.println(tmp);
-    if (0 <= tmp && tmp <= 90) {
-      m_servo.attach(pin_servo);
-      angle = tmp;
+    String tmp = mySerial.readString();
+    Serial.println(tmp);
+    if (tmp.equals("Backward") || tmp.equals("Forward")) {
+      m_servo.attach(pin_servo, 1000, 5000);
+      if(tmp.equals("Backward")){
+        angle = 0;
+      }else if(tmp.equals("Forward")){
+        angle = 180;
+      }
       m_servo.write(angle);
-      delay(2000);
+      delay(4500);
       m_servo.detach();
-      mySerial.print("Angle : ");
-      mySerial.println(angle);
+      Serial.print("Angle : ");
+      Serial.println(angle);
     }
-    else if (100 <= tmp && tmp <= 611) {
-      dcPower = tmp - 355;
-      if (-255 <= dcPower && dcPower <= 0) {
+    else if (tmp.equals("Open") || tmp.equals("Close") || tmp.equals("Stop")) {
+      dcPower = 255;
+      if (tmp.equals("Open")) {
         int speed = (-1)*dcPower;
         analogWrite(pin_icEnable, speed);
         digitalWrite(pin_dcMotor1, true);
         digitalWrite(pin_dcMotor2, false);
-        mySerial.print("Speed : ");
-        mySerial.println(speed);
+        Serial.print("Speed : ");
+        Serial.println(speed);
       }
-      else if (0 < dcPower && dcPower <= 255) {
+      else if (tmp.equals("Close")) {
         int speed = dcPower;
         analogWrite(pin_icEnable, speed);
         digitalWrite(pin_dcMotor1, false);
         digitalWrite(pin_dcMotor2, true);
-        mySerial.print("Speed : ");
-        mySerial.println(speed);
+        Serial.print("Speed : ");
+        Serial.println(speed);
+      }else if(tmp.equals("Stop")){
+        int speed = 0;
+        analogWrite(pin_icEnable, speed);
+        digitalWrite(pin_dcMotor1, false);
+        digitalWrite(pin_dcMotor2, false);
+        Serial.print("Speed : ");
+        Serial.println(speed);
       }
     }
   }
@@ -148,7 +165,7 @@ void CDS(){
         m_servo.detach();
         isClosed = false;
       }
-      if(isDown == false){
+      if(isClosed == false){
       	stat_move = 1;
       }
     }else if(700 <= cds_val){
@@ -160,7 +177,7 @@ void CDS(){
         m_servo.detach();
         isClosed = false;
       }
-      if(isDown == true){
+      if(isClosed == false){
         Serial.println("isDown is true");
       	stat_move = -1;
         
