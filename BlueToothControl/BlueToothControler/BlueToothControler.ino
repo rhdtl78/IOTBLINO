@@ -15,9 +15,11 @@ bool isDown = true;
 bool isClosed = true;
 bool isModifyMode = false;
 int second = 1000;
-int currentTime = 0;
-int prevTime = 0;
-unsigned long fifmin = 300000;
+//stop 20171030_ksy
+int stat_move = 0;
+int stat_stop = 1;
+int stat_time= 295; // 5~295
+
 SoftwareSerial mySerial(pin_blueTx,pin_blueRx);
 Servo m_servo;
 
@@ -33,9 +35,27 @@ void setup() {
 
 // the loop function runs over and over again until power down or reset
 void loop() {
-  MotorWrite();
   CDS();
   delay(1000);
+  if(stat_stop==0){
+  	stat_time += stat_move;
+  	if(stat_time < 5){
+		stat_stop = -1;
+	}
+	else if(stat_time > 295){
+		stat_stop = 1;
+	}
+	else{
+		MotorWrite();
+		changeDC();
+	}
+  }
+  else{
+  	if(stat_stop != stat_move){
+		stat_stop = 0;
+		stat_time += stat_move;
+	}
+  }
 }
 
 /*
@@ -80,17 +100,34 @@ void MotorWrite() {
   }
 }
 
+/*
+	DC모터만 따로 움직이게끔 설정.
+	
+*/
+void changeDC(){
+	if(stat_move == 1){
+		int speed = 255;
+		analogWrite(pin_icEnable, (-1)*speed);
+		digitalWrite(pin_dcMotor1, true);
+		digitalWrite(pin_dcMotor2, false);
+	}
+	else if(stat_move == -1){
+		int speed = 255;
+		analogWrite(pin_icEnable, speed);
+		digitalWrite(pin_dcMotor1, false);
+		digitalWrite(pin_dcMotor2, true);
+	}
+}
+
 void CDS(){
   if(isModifyMode == false){
     int cds_val = analogRead(pin_cds);
     if(0 <= cds_val && cds_val <500){
       //내리고 닫아야함.
+      
       Serial.println("Down,Close");
       if(isDown == false){
-        int speed = 255;
-        analogWrite(pin_icEnable, (-1)*speed);
-        digitalWrite(pin_dcMotor1, true);
-        digitalWrite(pin_dcMotor2, false);
+      	stat_move = 1;
         isDown = true;
       }
       if(isClosed == false){
@@ -109,26 +146,20 @@ void CDS(){
         isClosed = false;
       }
       if(isDown == false){
-        int speed = 255;
-        analogWrite(pin_icEnable, (-1)*speed);
-        digitalWrite(pin_dcMotor1, true);
-        digitalWrite(pin_dcMotor2, false);
+      	stat_move = 1;
         isDown = true;
       }
     }else if(700 <= cds_val){
       //열고 올려야함
       Serial.println("Up,Open");
-      if(isClosed == false){
+      if(isClosed == true){
         m_servo.attach(pin_servo);
         m_servo.write(-3600);
         m_servo.detach();
         isClosed = false;
       }
       if(isDown == true){
-        int speed = 255;
-        analogWrite(pin_icEnable, speed);
-        digitalWrite(pin_dcMotor1, false);
-        digitalWrite(pin_dcMotor2, true);
+      	stat_move = -1;
         isDown = false;
       }
     }
